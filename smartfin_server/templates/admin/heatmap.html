@@ -1,0 +1,57 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { height: 600px; width: 100%; border-radius: 8px; margin-top: 20px; }
+    .legend { background: white; padding: 10px; border-radius: 5px; line-height: 1.5; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+    .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+</style>
+
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const heatmapData = {{ heatmap_data|safe }};
+        
+        // Default center (can be dynamic based on data)
+        let center = [34.05, -118.24]; 
+        if (heatmapData.length > 0) {
+            center = [heatmapData[0].lat, heatmapData[0].lng];
+        }
+
+        const map = L.map('map').setView(center, 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Prepare points: [lat, lng, intensity]
+        // Intensity will be relative to temperature
+        const heatPoints = heatmapData.map(p => [p.lat, p.lng, p.temp / 40.0]); // Normalize temp roughly
+
+        const heat = L.heatLayer(heatPoints, {
+            radius: 25,
+            blur: 15,
+            maxZoom: 17,
+            gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+        }).addTo(map);
+
+        // Add markers for hover info
+        heatmapData.forEach(p => {
+            L.circleMarker([p.lat, p.lng], {
+                radius: 5,
+                color: 'transparent',
+                fillColor: 'transparent',
+                fillOpacity: 0
+            }).addTo(map)
+            .bindPopup(`Temp: ${p.temp}°C`);
+        });
+    });
+</script>
+{% endblock %}
