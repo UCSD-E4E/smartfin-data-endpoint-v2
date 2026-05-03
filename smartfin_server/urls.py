@@ -20,4 +20,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/upload", views.upload, name="upload"),
+    path('api/sessions', views.get_sessions, name='get_sessions'),
+    path('api/sessions/<int:session_id>', views.get_session, name='get_session'),
+    path('api/sessions/create', views.create_session, name='create_session'),
 ]

@@ -3,7 +3,7 @@ from django.urls import path
 from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
-from .models import EnsembleReading
+from .models import EnsembleReading, Session
 
 @admin.register(EnsembleReading)
 class EnsembleReadingAdmin(admin.ModelAdmin):
@@ -48,3 +48,8 @@ class EnsembleReadingAdmin(admin.ModelAdmin):
             'title': 'SmartFin Temperature Heatmap (Current Week)'
         }
         return render(request, 'admin/heatmap.html', context)
+
+@admin.register(Session)
+class SessionAdmin(admin.ModelAdmin):
+    list_display = ('client_session_id', 'started_at', 'ended_at')
+    search_fields = ('client_session_id',)
