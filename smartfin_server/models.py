@@ -8,7 +8,7 @@ class EnsembleReading(models.Model):
         ('12', 'High Data Rate IMU'),
     ]
 
-    session_id = models.ForeignKey('Session', on_delete=models.CASCADE, related_name="ensembles")
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, related_name="ensembles")
     ensemble_type = models.CharField(max_length=2, choices=ENSEMBLE_CHOICES)
     temperature = models.FloatField(null=True, blank=True)
     water_status = models.CharField(max_length=100, null=True, blank=True)

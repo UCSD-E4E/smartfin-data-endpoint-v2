@@ -15,7 +15,62 @@ import json
 from .models import EnsembleReading, Session
 
 @csrf_exempt
-def upload(request):
+def get_ensembles(request):
+    """
+    Returns a list of all ensembles
+    GET /api/ensembles
+    """
+    if request.method == "GET":
+        try:
+            ensembles = EnsembleReading.objects.all()
+            data = [
+                {
+                    "id": ensemble.id,
+                    "session_id": ensemble.session.client_session_id,
+                    "ensemble_type": ensemble.ensemble_type,
+                    "temperature": ensemble.temperature,
+                    "water_status": ensemble.water_status,
+                    "gps": ensemble.geo_coordinates,
+                    "imu": ensemble.imu_data
+                }
+                for ensemble in ensembles
+            ]
+            return JsonResponse(data, safe=False)
+        except Exception as e:
+            print(f"Error fetching ensembles: {e}")
+            return HttpResponse(f"Error fetching ensembles: {e}", status=500)
+
+    return HttpResponse("Invalid request method", status=405)
+
+@csrf_exempt
+def get_ensemble(request, ensemble_id):
+    """
+    Returns details of a specific ensemble.
+    GET /api/ensembles/<ensemble_id>
+    """
+    if request.method == "GET":
+        try:
+            ensemble = EnsembleReading.objects.get(pk=ensemble_id)
+            data = {
+                "id": ensemble.id,
+                "session_id": ensemble.session.client_session_id,
+                "ensemble_type": ensemble.ensemble_type,
+                "temperature": ensemble.temperature,
+                "water_status": ensemble.water_status,
+                "gps": ensemble.geo_coordinates,
+                "imu": ensemble.imu_data
+            }
+            return JsonResponse(data)
+        except EnsembleReading.DoesNotExist:
+            return HttpResponse("Ensemble not found", status=404)
+        except Exception as e:
+            print(f"Error fetching ensemble: {e}")
+            return HttpResponse(f"Error fetching ensemble: {e}", status=500)
+        
+    return HttpResponse("Invalid request method", status=405)
+
+@csrf_exempt
+def create_ensemble(request):
     """
     Handles data uploads from SmartFin.
     Expected data structure:
