@@ -102,7 +102,7 @@ def create_ensemble(request):
 
             # Create the reading using the available data
             reading = EnsembleReading.objects.create(
-                session_id=Session.objects.get(pk=session_id),
+                session=Session.objects.get(pk=session_id),
                 ensemble_type=ensemble_type,
                 temperature=data.get("temperature"),
                 water_status=data.get("water_status") or data.get("status"),
