@@ -106,6 +106,52 @@ The API is now available at `http://localhost:8000`.
 
 ---
 
+## Deploy on Render (Native Python)
+
+This repo includes a Render Blueprint at [render.yaml](render.yaml) for a native Python deployment.
+
+**1. Push this repository to GitHub**
+
+Render will deploy from your Git provider.
+
+**2. Create the Blueprint service in Render**
+
+- In Render, choose: New + > Blueprint
+- Select this repository
+- Render reads [render.yaml](render.yaml) and creates:
+  - Web Service: `smartfin-data-endpoint-v2`
+  - PostgreSQL: `smartfin-db`
+
+**3. Adjust domain-specific environment values**
+
+After first deploy, if your service URL is different than the default name, update these env vars in Render:
+
+- `ALLOWED_HOSTS`
+- `CSRF_TRUSTED_ORIGINS`
+
+Use your actual Render web URL.
+
+**4. Create admin user**
+
+Open Render Shell for the web service and run:
+
+```bash
+python manage.py createsuperuser
+```
+
+**5. Verify deployment**
+
+- App URL: your Render web service URL
+- Admin URL: `https://<your-service>.onrender.com/admin/`
+
+### Notes
+
+- Start command runs migrations automatically at boot.
+- Database is connected via `DATABASE_URL`.
+- Production security flags are enabled when `DEBUG=False`.
+
+---
+
 ## API Reference
 
 All sensor endpoints require a Bearer token in the `Authorization` header:

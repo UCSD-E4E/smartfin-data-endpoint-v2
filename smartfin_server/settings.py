@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -32,6 +33,18 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-django-insecure-$+@kf69a)p
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+
+
+def _env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in ('true', '1', 't', 'yes', 'on')
 
 
 # Application definition
@@ -91,6 +104,13 @@ DATABASES = {
     }
 }
 
+if os.getenv('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.parse(
+        os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=_env_bool('DB_SSL_REQUIRE', default=not DEBUG),
+    )
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -128,6 +148,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', default=True)
+    SESSION_COOKIE_SECURE = _env_bool('SESSION_COOKIE_SECURE', default=True)
+    CSRF_COOKIE_SECURE = _env_bool('CSRF_COOKIE_SECURE', default=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
